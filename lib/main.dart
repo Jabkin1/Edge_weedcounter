@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_routes.dart'; // Make sure this matches your actual file path
 
+//TODO: multiple modelmodel selection
+//TODO: evaluation part different colors for different species,
+//TODO: not there yet: more crops
+//TODO: write documentation
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
