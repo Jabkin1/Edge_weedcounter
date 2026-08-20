@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'app_routes.dart'; // Make sure this matches your actual file path
+import 'app_routes.dart';
+import 'utils/plant_data.dart';
 
-//TODO: multiple modelmodel selection
-//TODO: evaluation part different colors for different species,
+
+//TODO: multiple model selection
 //TODO: not there yet: more crops
 //TODO: write documentation
-// TODO: result summary page
-//TODO: reset solni threshold in csv, reset to adequate values for detection
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    plant_data.load();
     return MaterialApp(
       title: 'Weed Counter+',
       debugShowCheckedModeBanner: false,

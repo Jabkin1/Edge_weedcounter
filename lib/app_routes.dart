@@ -34,7 +34,7 @@ class AppRoutes {
     } else if (routeName == summary) {
       final args = settings.arguments;
       return MaterialPageRoute(
-        builder: (_) => SummaryPage(aggregator: (args is DetectionAggregator) ? args : DetectionAggregator(), thresholds: {},),
+        builder: (_) => SummaryPage(aggregator: (args is DetectionAggregator) ? args : DetectionAggregator()),
       );
     } else if (routeName == settings) {
       return MaterialPageRoute(builder: (_) => const SettingsPage());

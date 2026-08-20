@@ -27,8 +27,8 @@ class YoloService {
   static const int inputSize = 640;
 
   // Configurable thresholds
-  double confThreshold = 0.01;
-  double nmsIouThreshold = 0.3;
+  double confThreshold = 0.45;//confidence lower is more observations
+  double nmsIouThreshold = 0.3;//lower is less overlap (maximum allowed overlap)
 
   Future<void> loadModel() async {
     if (_interpreter != null) {

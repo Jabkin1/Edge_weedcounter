@@ -7,6 +7,7 @@ import '../utils/aggregator.dart';
 import '../utils/detection_painter.dart';
 import 'summary_page.dart';
 import 'package:csv/csv.dart';
+import '../utils/plant_data.dart';
 
 /// Main widget class
 class ResultPage extends StatefulWidget {
@@ -36,7 +37,7 @@ class _ResultPageState extends State<ResultPage> {
   void initState() {
     super.initState();
     _loadLabels();
-
+    _runDetection();
     // Use provided detections if available (e.g. from a previous session)
     if (widget.initialDetections != null &&
         widget.initialDetections!.isNotEmpty) {
@@ -49,7 +50,7 @@ class _ResultPageState extends State<ResultPage> {
       for (final r in _results) {
         final List filtered = (r['detections'] as List).where((d) {
           final conf = (d['confidence'] ?? 0.0) as num;
-          return conf >= 0.001;
+          return conf >= 0.3;
         }).toList();
         aggregator.addDetection(filtered.cast<Map<String, dynamic>>());
       }
@@ -59,29 +60,11 @@ class _ResultPageState extends State<ResultPage> {
       _loading = false;
     }
   }
-  Map<String, double> _thresholds = {};
 
   Future<void> _loadLabels() async {
     try {
-      final rawCSV_text = await rootBundle.loadString('assets/plants.csv');
-      final rows = csv.decode(rawCSV_text);
-      final header = rows.first;
-      final labelIndex = header.indexOf('label');
-      final thresholdIndex = header.indexOf('Threshold');
-
-      if (labelIndex == -1) {
-        throw Exception('No "label" column found in plants.csv');
-      }
-
       setState(() {
-        _labels = rows.skip(1).map((row) => row[labelIndex].toString().trim()).toList();
-        _thresholds = Map.fromEntries(rows.skip(1).map( (row) {
-          final label = row[labelIndex].toString().trim();
-          final threshold = thresholdIndex != -1 && row.length > thresholdIndex
-              ? double.tryParse(row[thresholdIndex].toString()) ?? 0.0
-              : 0.0;
-          return MapEntry(label, threshold);
-        }));
+        _labels = plant_data.getLabels();
       });
       debugPrint('✅ Loaded ${_labels.length} labels.');
     } catch (e) {
@@ -148,7 +131,7 @@ class _ResultPageState extends State<ResultPage> {
       }).toList();
 
       final filtered =
-          normalized.where((d) => (d['confidence'] as double) >= 0.001).toList();
+          normalized.where((d) => (d['confidence'] as double) >= 0.3).toList();
 
       aggregator.addDetection(filtered);
       _results.add({'imagePath': path, 'detections': filtered});
@@ -290,7 +273,7 @@ class _ResultPageState extends State<ResultPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SummaryPage(aggregator: _aggregator!,thresholds: _thresholds),
+                    builder: (_) => SummaryPage(aggregator: _aggregator!),
                   ),
                 );
               },

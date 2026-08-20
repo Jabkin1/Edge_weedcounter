@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yweed_counter_plus/utils/plant_data.dart';
 
 class DetectionPainter extends CustomPainter {
   final List<Map<String, dynamic>> detections;
@@ -50,7 +51,7 @@ class DetectionPainter extends CustomPainter {
       final h = rectH * scaleY;
 
       // choose color by label
-      final color = Colors.primaries[label.hashCode % Colors.primaries.length];
+      final color = plant_data.getColor(label);
       paint.color = color;
 
       // box

@@ -1,13 +1,13 @@
-label,Scientific name,Common Name,Threshold
-steme,Stellaria media (L.) Vill.,Common Chickweed,11
-echcg,Echinochloa crus-galli (L.) P. Beauv.,Barnyard Grass,0.1
-solni,Solanum nigrum L.,Black Nightshade,0.01
-cheal,Chenopodium album L.,Common Lambsquarters,3.5
-maize,Zea mays L.,Corn (Maize),-1
-amare,Amaranthus retroflexus L.,Redroot Pigweed,0.7
-verpe,Veronica persica Poir.,Persian Speedwell,20
-polla,Persicaria lapathifolia (L.) Delarbre,Pale Smartweed,1
-galap,Galium aparine L.,Cleavers,2
-paprh,Papaver rhoeas L.,Common Poppy,8
-meran,Mercurialis annua L.,Annual Mercury,4
-sonas,Sonchus asper (L.) Hill,Spiny Sowthistle,1
+label,Scientific name,Common Name,Threshold,colour
+steme,Stellaria media (L.) Vill.,Common Chickweed,11,#C0392B
+echcg,Echinochloa crus-galli (L.) P. Beauv.,Barnyard Grass,0.1,#FF0000
+solni,Solanum nigrum L.,Black Nightshade,1,#F1C40F
+cheal,Chenopodium album L.,Common Lambsquarters,3.5,#D35400
+maize,Zea mays L.,Corn (Maize),-1,#2E8B57
+amare,Amaranthus retroflexus L.,Redroot Pigweed,0.7,#E74C3C
+verpe,Veronica persica Poir.,Persian Speedwell,20,#922B21
+polla,Persicaria lapathifolia (L.) Delarbre,Pale Smartweed,1,#F39C12
+galap,Galium aparine L.,Cleavers,2,#CD6155
+paprh,Papaver rhoeas L.,Common Poppy,8,#A93226
+meran,Mercurialis annua L.,Annual Mercury,4,#E59866
+sonas,Sonchus asper (L.) Hill,Spiny Sowthistle,1,#CB4335
