@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import '../services/camera_service.dart';
 import 'result_page.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -13,8 +14,10 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
   final CameraService _cameraService = CameraService();
+  final ImagePicker _picker = ImagePicker();
   bool _isLoading = true;
   List<XFile> _capturedImages = [];
+  int _selectedSource = 0;
 
   @override
   void initState() {
@@ -48,26 +51,29 @@ class _CameraPageState extends State<CameraPage> {
     }
   }
 
+  Future<void> _pickFromGallery() async {
+    if (_capturedImages.length >= 2) return;
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() => _capturedImages.add(image));
+      }
+    } catch (e) {
+      debugPrint('Failed to pick image: $e');
+    }
+  }
+
   void _resetImages() {
     setState(() => _capturedImages.clear());
   }
 
   void _goToResults() {
     if (_capturedImages.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please capture 2 images first.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please capture 2 images first.')),);
       return;
     }
-
     final imagePaths = _capturedImages.map((xfile) => xfile.path).toList();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ResultPage(imagePaths: imagePaths),
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute( builder: (_) => ResultPage(imagePaths: imagePaths),),);
   }
 
   @override
@@ -79,20 +85,39 @@ class _CameraPageState extends State<CameraPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Expanded(child: _cameraService.cameraPreview()),
+                if (_selectedSource == 0)
+                  Expanded(child: _cameraService.cameraPreview())
+                else
+                  const Expanded(
+                  child: Center(
+                    child: Text('Select "Gallery" to pick images', style: TextStyle(fontSize: 16, color: Colors.grey),),),),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     children: [
+                      // Source selector (Camera/Gallery)
+                      SegmentedButton<int>(
+                        segments: const [
+                          ButtonSegment(value: 0, icon: Icon(Icons.camera_alt), label: Text('Camera'),),
+                          ButtonSegment(value: 1, icon: Icon(Icons.photo_library), label: Text('Gallery'),),
+                        ],
+                        selected: {_selectedSource},
+                        onSelectionChanged: (Set<int> newSelection) {
+                          setState(() => _selectedSource = newSelection.first);
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
                       Text('Images Taken: ${_capturedImages.length}/2'),
                       const SizedBox(height: 8),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           ElevatedButton.icon(
-                            onPressed: _takePicture,
-                            icon: const Icon(Icons.camera_alt),
-                            label: const Text('Capture'),
+                            onPressed: _selectedSource == 0 ? _takePicture : _pickFromGallery,
+                            icon: Icon(_selectedSource == 0 ? Icons.camera_alt : Icons.photo_library,),
+                            label: Text(_selectedSource == 0 ? 'Capture' : 'Pick Image',),
                           ),
                           ElevatedButton.icon(
                             onPressed: _resetImages,
@@ -100,9 +125,7 @@ class _CameraPageState extends State<CameraPage> {
                             label: const Text('Reset'),
                           ),
                           ElevatedButton.icon(
-                            onPressed: _capturedImages.length == 2
-                                ? _goToResults
-                                : null,
+                            onPressed: _capturedImages.length == 2 ? _goToResults : null,
                             icon: const Icon(Icons.arrow_forward),
                             label: const Text('Results'),
                           ),
@@ -118,12 +141,7 @@ class _CameraPageState extends State<CameraPage> {
                             children: _capturedImages.map((xfile) {
                               return Padding(
                                 padding: const EdgeInsets.all(4.0),
-                                child: Image.file(
-                                  File(xfile.path),
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: Image.file(File(xfile.path), width: 80, height: 80, fit: BoxFit.cover,),
                               );
                             }).toList(),
                           ),

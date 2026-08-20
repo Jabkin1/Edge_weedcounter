@@ -27,8 +27,8 @@ class YoloService {
   static const int inputSize = 640;
 
   // Configurable thresholds
-  double confThreshold = 0.45;
-  double nmsIouThreshold = 0.55;
+  double confThreshold = 0.01;
+  double nmsIouThreshold = 0.3;
 
   Future<void> loadModel() async {
     if (_interpreter != null) {

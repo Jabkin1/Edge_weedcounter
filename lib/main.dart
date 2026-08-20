@@ -5,6 +5,9 @@ import 'app_routes.dart'; // Make sure this matches your actual file path
 //TODO: evaluation part different colors for different species,
 //TODO: not there yet: more crops
 //TODO: write documentation
+// TODO: result summary page
+//TODO: reset solni threshold in csv, reset to adequate values for detection
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());

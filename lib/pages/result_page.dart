@@ -6,11 +6,13 @@ import '../services/yolo_service.dart';
 import '../utils/aggregator.dart';
 import '../utils/detection_painter.dart';
 import 'summary_page.dart';
+import 'package:csv/csv.dart';
 
 /// Main widget class
 class ResultPage extends StatefulWidget {
   final List<String> imagePaths;
   final Map<String, List<Map<String, dynamic>>>? initialDetections;
+
 
   const ResultPage({
     Key? key,
@@ -47,7 +49,7 @@ class _ResultPageState extends State<ResultPage> {
       for (final r in _results) {
         final List filtered = (r['detections'] as List).where((d) {
           final conf = (d['confidence'] ?? 0.0) as num;
-          return conf >= 0.3;
+          return conf >= 0.001;
         }).toList();
         aggregator.addDetection(filtered.cast<Map<String, dynamic>>());
       }
@@ -57,12 +59,29 @@ class _ResultPageState extends State<ResultPage> {
       _loading = false;
     }
   }
+  Map<String, double> _thresholds = {};
 
   Future<void> _loadLabels() async {
     try {
-      final raw = await rootBundle.loadString('assets/labels.txt');
+      final rawCSV_text = await rootBundle.loadString('assets/plants.csv');
+      final rows = csv.decode(rawCSV_text);
+      final header = rows.first;
+      final labelIndex = header.indexOf('label');
+      final thresholdIndex = header.indexOf('Threshold');
+
+      if (labelIndex == -1) {
+        throw Exception('No "label" column found in plants.csv');
+      }
+
       setState(() {
-        _labels = raw.split('\n').where((l) => l.trim().isNotEmpty).toList();
+        _labels = rows.skip(1).map((row) => row[labelIndex].toString().trim()).toList();
+        _thresholds = Map.fromEntries(rows.skip(1).map( (row) {
+          final label = row[labelIndex].toString().trim();
+          final threshold = thresholdIndex != -1 && row.length > thresholdIndex
+              ? double.tryParse(row[thresholdIndex].toString()) ?? 0.0
+              : 0.0;
+          return MapEntry(label, threshold);
+        }));
       });
       debugPrint('✅ Loaded ${_labels.length} labels.');
     } catch (e) {
@@ -71,6 +90,13 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   Future<void> _runDetection() async {
+    if (_labels.isEmpty) {
+      await _loadLabels();
+      if (_labels.isEmpty) {
+        debugPrint('⚠️ No labels loaded! Using placeholders.');
+      }
+    }// ✅ Ensure labels are loaded first
+
     setState(() => _loading = true);
 
     final yolo = YoloService();
@@ -94,36 +120,35 @@ class _ResultPageState extends State<ResultPage> {
       // ✅ FIX 4 & 5: Normalize keys and resolve label names from labels.txt.
       // YoloService now always emits 'classIndex' alongside the placeholder 'label'.
       // We prioritise classIndex → labels[idx] over the raw 'class_N' placeholder.
-      final normalized = rawDetections.map((det) {
+      final normalized = rawDetections.map((detection) {
         // Resolve the numeric class index (prefer explicit classIndex key)
-        final dynamic rawIdx = det['classIndex'] ??
-            det['class'] ??
-            det['class_id'] ??
-            det['label_index'];
-        final int? cidx =
-            rawIdx != null ? (rawIdx as num).toInt() : null;
+        final dynamic rawClassIndex = detection['classIndex'] ??
+            detection['class'] ??
+            detection['class_id'] ??
+            detection['label_index'];
+        final int? classIndex = rawClassIndex != null ? (rawClassIndex as num).toInt() : null;
 
         // Map to a human-readable label
-        final String label = (cidx != null && cidx < _labels.length)
-            ? _labels[cidx]
-            : (det['label'] as String? ??
-               det['class_name'] as String? ??
+        final String label = (classIndex != null && classIndex < _labels.length)
+            ? _labels[classIndex]
+            : (detection['label'] as String? ??
+               detection['class_name'] as String? ??
                'Unknown');
 
         return {
-          'x':          (det['x'] ?? det['left'] ?? 0.0).toDouble(),
-          'y':          (det['y'] ?? det['top']  ?? 0.0).toDouble(),
-          'w':          (det['w'] ?? det['width'] ?? 0.0).toDouble(),
-          'h':          (det['h'] ?? det['height'] ?? 0.0).toDouble(),
-          'confidence': (det['confidence'] ?? det['score'] ?? det['conf'] ?? 0.0)
+          'x':          (detection['x'] ?? detection['left'] ?? 0.0).toDouble(),
+          'y':          (detection['y'] ?? detection['top']  ?? 0.0).toDouble(),
+          'w':          (detection['w'] ?? detection['width'] ?? 0.0).toDouble(),
+          'h':          (detection['h'] ?? detection['height'] ?? 0.0).toDouble(),
+          'confidence': (detection['confidence'] ?? detection['score'] ?? detection['conf'] ?? 0.0)
                             .toDouble(),
-          'classIndex': cidx,
+          'classIndex': classIndex,
           'label':      label,
         };
       }).toList();
 
       final filtered =
-          normalized.where((d) => (d['confidence'] as double) >= 0.3).toList();
+          normalized.where((d) => (d['confidence'] as double) >= 0.001).toList();
 
       aggregator.addDetection(filtered);
       _results.add({'imagePath': path, 'detections': filtered});
@@ -265,7 +290,7 @@ class _ResultPageState extends State<ResultPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SummaryPage(aggregator: _aggregator!),
+                    builder: (_) => SummaryPage(aggregator: _aggregator!,thresholds: _thresholds),
                   ),
                 );
               },
