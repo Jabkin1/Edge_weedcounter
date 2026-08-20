@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/models.dart';
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -51,6 +53,23 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               },
             ),
+            const SizedBox(height: 24),
+            const Text(
+              'Model Selection:\n Choose model to use for the detection, a larger model is preferred for a more accurate detection, but it might be difficult to run on all phones',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            DropdownButton<String>(
+                value: ModelSelection.selectedModel,
+                items: ModelSelection.models.map((model) {
+                  return DropdownMenuItem<String>(
+                    value: model['name'],
+                    child: Text(model['name']!),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  ModelSelection.selectedModel = value!;
+                }),
             const SizedBox(height: 24),
             const Text(
               'Crop Model Selection',

@@ -6,6 +6,7 @@ import 'utils/plant_data.dart';
 //TODO: multiple model selection
 //TODO: not there yet: more crops
 //TODO: write documentation
+//TODO: Settings page: models, languages and model type.
 
 
 void main() {

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
+import '../utils/models.dart';
 
 class BuildInputResult {
   final dynamic inputBuffer; 
@@ -37,7 +38,8 @@ class YoloService {
     }
 
     try {
-      const String modelAssetPath = 'assets/models/yolo.tflite';
+      final String modelAssetPath = ModelSelection.selectedModelPath;
+
 
       final options = InterpreterOptions()..threads = 4;
       try {
