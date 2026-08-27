@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,6 +13,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       key: _scaffoldKey,
       drawer: Drawer(
@@ -23,23 +25,33 @@ class _HomePageState extends State<HomePage> {
               child: Image.asset('assets/logo.png'),
             ),
             ListTile(
-              title: const Text('Camera'),
+              title: Text(l10n.cameraPage),
               onTap: () => Navigator.pushNamed(context, '/camera'),
             ),
             ListTile(
-              title: const Text('Results'),
-              onTap: () => Navigator.pushNamed(context, '/results'),
+              title: Text(l10n.detections),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.takePicturesFirst)),
+                );
+              },
             ),
             ListTile(
-              title: const Text('Summary'),
-              onTap: () => Navigator.pushNamed(context, '/summary'),
+              title: Text(l10n.detectionSummary),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.takePicturesFirst)),
+                );
+              },
             ),
             ListTile(
-              title: const Text('Info'),
+              title: Text(l10n.info),
               onTap: () => Navigator.pushNamed(context, '/info'),
             ),
             ListTile(
-              title: const Text('Settings'),
+              title: Text(l10n.settings),
               onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
           ],
@@ -74,9 +86,8 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: Text(
-                'Weed Counter+ version 1.2',
+                l10n.weedCounterVersion,
                 style: const TextStyle(
-                  fontFamily: 'Ubuntu',
                   fontSize: 14,
                   color: Colors.black54,
                 ),

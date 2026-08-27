@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +94,11 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+  ];
 
   /// No description provided for @capture.
   ///
@@ -117,6 +123,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Return to Home'**
   String get returnHome;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @cameraPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get cameraPage;
+
+  /// No description provided for @detections.
+  ///
+  /// In en, this message translates to:
+  /// **'Detections'**
+  String get detections;
+
+  /// No description provided for @detectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection Summary'**
+  String get detectionSummary;
+
+  /// No description provided for @info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get info;
+
+  /// No description provided for @imagesTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Images Taken: {count}/10'**
+  String imagesTaken(Object count);
+
+  /// No description provided for @noDetections.
+  ///
+  /// In en, this message translates to:
+  /// **'No detections found.'**
+  String get noDetections;
+
+  /// No description provided for @runDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Detection'**
+  String get runDetection;
+
+  /// No description provided for @viewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'View Summary'**
+  String get viewSummary;
+
+  /// No description provided for @languagePreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Language Preference'**
+  String get languagePreference;
+
+  /// No description provided for @cropModelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Model Selection'**
+  String get cropModelSelection;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @french.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get french;
+
+  /// No description provided for @spanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get spanish;
+
+  /// No description provided for @weedCounterVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Weed Counter+ version 1.2'**
+  String get weedCounterVersion;
+
+  /// No description provided for @infoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This app helps you detect weed species and their coverage on fields. Use the camera to take 10 random images of the field, run the analysis in results and watch what to do in summary.'**
+  String get infoDescription;
+
+  /// No description provided for @countLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Count: {count}'**
+  String countLabel(Object count);
+
+  /// No description provided for @averageConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Confidence: {percent}%'**
+  String averageConfidence(Object percent);
+
+  /// No description provided for @noActionNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'No action needed'**
+  String get noActionNeeded;
+
+  /// No description provided for @manualCheckRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual check recommended'**
+  String get manualCheckRecommended;
+
+  /// No description provided for @manageWeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage weeds'**
+  String get manageWeeds;
+
+  /// No description provided for @manageWeedsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Control measures are advised'**
+  String get manageWeedsDesc;
+
+  /// No description provided for @manualCheckDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify field conditions before deciding'**
+  String get manualCheckDesc;
+
+  /// No description provided for @areaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Area surveyed'**
+  String get areaLabel;
+
+  /// No description provided for @noDetectionsRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'No detections recorded'**
+  String get noDetectionsRecorded;
+
+  /// No description provided for @percentOfThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of threshold'**
+  String percentOfThreshold(Object percent);
+
+  /// No description provided for @chipCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get chipCount;
+
+  /// No description provided for @chipThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get chipThreshold;
+
+  /// No description provided for @chipDensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Density'**
+  String get chipDensity;
+
+  /// No description provided for @retake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retake;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
+  /// No description provided for @takePicturesFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Take pictures first!'**
+  String get takePicturesFirst;
 }
 
 class _AppLocalizationsDelegate
@@ -130,7 +328,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+      <String>['en', 'es', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -141,6 +339,10 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(

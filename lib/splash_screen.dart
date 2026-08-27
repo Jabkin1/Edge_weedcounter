@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../services/yolo_service.dart';
-import '../services/camera_service.dart';
+import 'services/yolo_service.dart';
 
 class AppServices {
   static final AppServices _instance = AppServices._internal();
   late final YoloService yoloService;
-  late final CameraService cameraService;
 
   factory AppServices() => _instance;
 
@@ -15,11 +13,6 @@ class AppServices {
   Future<void> preloadModelOnly() async {
     yoloService = YoloService();
     await yoloService.loadModel();
-  }
-
-  Future<void> initializeCamera() async {
-    cameraService = CameraService();
-    await cameraService.initialize();
   }
 }
 
@@ -50,12 +43,16 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    });
+    _initServices();
+  }
+
+  Future<void> _initServices() async {
+    final services = AppServices();
+    await services.preloadModelOnly();
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   @override

@@ -1,10 +1,11 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class BuildInputResult {
-  final dynamic inputBuffer; 
+  final dynamic inputBuffer; // Uint8List for uint8, Float32List for float
   final double scale;
   final double padX;
   final double padY;
@@ -15,30 +16,33 @@ class BuildInputResult {
 
 class YoloService {
 
+
   YoloService._internal();
   static final YoloService _instance = YoloService._internal();
   factory YoloService() => _instance;
 
   Interpreter? _interpreter;
   bool _isRunning = false;
-  // ignore: unused_field
-  bool _interpreterAllocated = false;
+
 
   static const int inputSize = 640;
 
   // Configurable thresholds
-  double confThreshold = 0.45;
-  double nmsIouThreshold = 0.55;
+  double confThreshold = 0.4;
+  double nmsIouThreshold = 0.5;
 
   Future<void> loadModel() async {
+    // Prevent loading the model twice
     if (_interpreter != null) {
       debugPrint('✅ YOLO model already loaded');
       return;
     }
 
     try {
+      // 👇 Use 'const' — not 'onst'
       const String modelAssetPath = 'assets/models/yolo.tflite';
 
+      // Set up interpreter options
       final options = InterpreterOptions()..threads = 4;
       try {
         options.addDelegate(XNNPackDelegate());
@@ -47,9 +51,11 @@ class YoloService {
         debugPrint('⚠️ XNNPack not supported, using CPU fallback: $e');
       }
 
+      // 👇 Load interpreter
       _interpreter = await Interpreter.fromAsset(modelAssetPath, options: options);
-      _interpreterAllocated = true;
+      _interpreter!.allocateTensors();
 
+      // Debug model info
       final inputTensor = _interpreter!.getInputTensor(0);
       final outputTensor = _interpreter!.getOutputTensor(0);
 
@@ -60,6 +66,7 @@ class YoloService {
       debugPrint('❌ Failed to load YOLO model: $e');
     }
   }
+
 
   bool get isLoaded => _interpreter != null;
   bool get isRunning => _isRunning;
@@ -74,10 +81,12 @@ class YoloService {
 
     _isRunning = true;
     try {
+      // Build input (letterbox by default)
       final inputTensor = _interpreter!.getInputTensor(0);
       final TensorType inputType = inputTensor.type;
       final BuildInputResult buildRes = _buildInput(image, inputType, letterbox: true);
 
+      // Prepare output wrapper
       final outputTensor = _interpreter!.getOutputTensor(0);
       final TensorType outputType = outputTensor.type;
       final outShape = outputTensor.shape; // e.g. [1, 25200, 17]
@@ -97,26 +106,9 @@ class YoloService {
         throw Exception('Unsupported output tensor type: $outputType');
       }
 
-      debugPrint('🧠 --- MODEL INFO ---');
-      debugPrint('input shape: ${inputTensor.shape}, type: ${inputTensor.type}');
-      debugPrint('output shape: ${outputTensor.shape}, type: ${outputTensor.type}');
-      debugPrint('numBoxes=$numBoxes, numAttrs=$numAttrs');
-      debugPrint(
-        'build input: scale=${buildRes.scale.toStringAsFixed(4)}, '
-        'padX=${buildRes.padX}, padY=${buildRes.padY}, '
-        'resizedW=${buildRes.resizedW}, resizedH=${buildRes.resizedH}, '
-        'buffer length=${buildRes.inputBuffer.length}'
-      );
-
-      if (buildRes.inputBuffer.isNotEmpty) {
-        final sampleVals = buildRes.inputBuffer.take(6).toList();
-        debugPrint('first input vals: $sampleVals');
-      }
-
+      // Run inference
       final inferStart = DateTime.now();
-      _interpreter!.allocateTensors();
       _interpreter!.run(buildRes.inputBuffer, outputWrapper);
-
       // 🧩 Dequantize output if needed
       List<List<double>> preds;
       if (outputType == TensorType.uint8) {
@@ -143,12 +135,14 @@ class YoloService {
         return [];
       }
 
+      // Optional debug samples
       debugPrint('🔍 Example pred[0]: ${preds.first.take(10).toList()}');
       debugPrint('🔬 mean(obj)=${preds.take(50).map((r)=>r[4]).reduce((a,b)=>a+b)/50}');
 
       final inferTime = DateTime.now().difference(inferStart);
       debugPrint('⏱ Inference time: ${inferTime.inMilliseconds} ms');
 
+      // Debug output tensors
       final outTensors = _interpreter!.getOutputTensors();
       debugPrint('🧠 Output tensors count: ${outTensors.length}');
       for (var i = 0; i < outTensors.length; i++) {
@@ -183,28 +177,22 @@ class YoloService {
         debugPrint('📊 Column means: $means');
       }
 
-      // === ASSUME YOLOv5 layout ===
-      // YOLOv5 TFLite export: [cx, cy, w, h, obj, cls0..clsN]
+      // === layout detection (robust) ===
+      // YOLO-style layout: [cx,cy,w,h,obj,cls0..clsN]
       int objIndex = 4;
       int classStart = 5;
-      int numClasses = numAttrs - classStart;
-      debugPrint('🔧 Assuming YOLOv5 layout: objIndex=$objIndex, classStart=$classStart, numClasses=$numClasses (numAttrs=$numAttrs)');
-
+      int numClasses;
       if (numAttrs == 17) {
-        objIndex = 4;
-        classStart = 5;
         numClasses = 12;
       } else if (numAttrs > 5) {
-        objIndex = 4;
-        classStart = 5;
         numClasses = numAttrs - classStart;
       } else {
-        objIndex = 4;
-        classStart = 5;
         numClasses = math.max(0, numAttrs - classStart);
       }
 
+      // Extra safety: if numClasses looks wrong (too small/huge) try a quick heuristic scan
       if (numClasses <= 0 || numClasses > 1000) {
+        // compute column means across a sample (robust but only used as emergency fallback)
         if (preds.isNotEmpty) {
           final sample = preds.take(math.min(500, preds.length)).toList();
           final cols = preds[0].length;
@@ -214,9 +202,10 @@ class YoloService {
           }
           for (int c = 0; c < cols; c++) means[c] /= sample.length;
 
+          // find first column after objIndex that looks like class logits (higher mean)
           int found = -1;
           for (int c = objIndex + 1; c < cols; c++) {
-            if (means[c] > 0.05) {
+            if (means[c] > 0.05) { // lower threshold than 0.2 — less brittle
               found = c;
               break;
             }
@@ -225,6 +214,7 @@ class YoloService {
             classStart = found;
             numClasses = cols - classStart;
           } else {
+            // final fallback
             classStart = 5;
             numClasses = cols - classStart;
           }
@@ -234,14 +224,12 @@ class YoloService {
         }
       }
 
+      // Sanity clamp numClasses
       if (numClasses < 1) numClasses = math.max(1, numAttrs - classStart);
 
       debugPrint('🔧 Using layout: objIndex=$objIndex, classStart=$classStart, numClasses=$numClasses (numAttrs=$numAttrs)');
 
-      for (int i = 0; i < math.min(5, preds.length); i++) {
-        debugPrint('RAW pred[$i]: ${preds[i].take(8).map((v) => v.toStringAsFixed(4)).toList()}');
-      }
-
+      // Postprocess -> boxes in original image coordinates
       final detections = _postprocess(
           preds,
           image.width.toDouble(),
@@ -264,7 +252,7 @@ class YoloService {
     }
   }
 
-  /// Build input buffer with letterboxing
+  /// Build input buffer robustly without relying on image.fill / copyInto / constructors
   BuildInputResult _buildInput(img.Image image, TensorType inputType, {bool letterbox = true}) {
     final int origW = image.width;
     final int origH = image.height;
@@ -275,14 +263,18 @@ class YoloService {
       return BuildInputResult(buf, inputSize / origW, 0.0, 0.0, inputSize, inputSize);
     }
 
+    // letterbox path: compute scale and offsets
     final double scale = math.min(inputSize / origW, inputSize / origH);
     final int resizedW = (origW * scale).round();
     final int resizedH = (origH * scale).round();
     final img.Image resized = img.copyResize(image, width: resizedW, height: resizedH);
 
+    // We'll create an RGB buffer for the full inputSize x inputSize and fill with pad color,
+    // then copy resized pixels into the buffer at offsets.
     final int fullPx = inputSize * inputSize;
     final Uint8List rgb = Uint8List(fullPx * 3);
 
+    // pad color = 114 (common YOLO pad). Use 114 for R,G,B
     const int padVal = 114;
     for (int i = 0; i < rgb.length; i++) {
       rgb[i] = padVal;
@@ -291,15 +283,28 @@ class YoloService {
     final int padX = ((inputSize - resizedW) / 2).round();
     final int padY = ((inputSize - resizedH) / 2).round();
 
+    // copy resized pixels into rgb buffer at (padX, padY)
     for (int y = 0; y < resizedH; y++) {
       for (int x = 0; x < resizedW; x++) {
-        // ✅ FIX 2: image pkg v4+ returns Pixel (num r/g/b), not int.
-        // Using _extractRgb() handles both old (int) and new (Pixel) APIs safely.
-        final (int r, int g, int b) = _extractRgb(resized.getPixel(x, y));
+        final dynamic px = resized.getPixel(x, y); // may be int or Pixel
+        int r, g, b;
+        if (px is int) {
+          r = px & 0xFF;
+          g = (px >> 8) & 0xFF;
+          b = (px >> 16) & 0xFF;
+        } else {
+          try {
+            r = (px.r as int);
+            g = (px.g as int);
+            b = (px.b as int);
+          } catch (_) {
+            r = g = b = 0;
+          }
+        }
         final int dstX = x + padX;
         final int dstY = y + padY;
         final int idx = (dstY * inputSize + dstX) * 3;
-        rgb[idx]     = r;
+        rgb[idx] = r;
         rgb[idx + 1] = g;
         rgb[idx + 2] = b;
       }
@@ -308,6 +313,7 @@ class YoloService {
     if (inputType == TensorType.uint8) {
       return BuildInputResult(rgb, scale, padX.toDouble(), padY.toDouble(), resizedW, resizedH);
     } else {
+      // create float buffer normalized [0..1]
       final Float32List floats = Float32List(rgb.length);
       for (int i = 0; i < rgb.length; i++) {
         floats[i] = rgb[i] / 255.0;
@@ -316,27 +322,8 @@ class YoloService {
     }
   }
 
-  /// ✅ FIX 2 (helper): Safely extracts R,G,B from either an int pixel (image pkg v3)
-  /// or a Pixel object (image pkg v4+).  The v4 Pixel exposes .r/.g/.b as num,
-  /// so we call .toInt() rather than casting with 'as int'.
-  (int, int, int) _extractRgb(dynamic px) {
-    if (px is int) {
-      // Legacy image pkg v3 packed-int format: ARGB
-      return (
-        (px >> 16) & 0xFF,
-        (px >> 8)  & 0xFF,
-        px         & 0xFF,
-      );
-    }
-    // image pkg v4 Pixel object
-    return (
-      (px.r as num).toInt(),
-      (px.g as num).toInt(),
-      (px.b as num).toInt(),
-    );
-  }
-
-  /// Convert image pixels to flat RGB buffer (no letterbox, resized image expected)
+  /// Convert image pixels to buffer (resized image)
+  /// Returns Uint8List for uint8, Float32List for float input
   dynamic _pixelsToBuffer(img.Image image, TensorType inputType) {
     final int w = image.width;
     final int h = image.height;
@@ -345,8 +332,21 @@ class YoloService {
     int k = 0;
     for (int y = 0; y < h; y++) {
       for (int x = 0; x < w; x++) {
-        // ✅ FIX 2: same safe extraction
-        final (int r, int g, int b) = _extractRgb(image.getPixel(x, y));
+        final dynamic px = image.getPixel(x, y);
+        int r, g, b;
+        if (px is int) {
+          r = px & 0xFF;
+          g = (px >> 8) & 0xFF;
+          b = (px >> 16) & 0xFF;
+        } else {
+          try {
+            r = (px.r as int);
+            g = (px.g as int);
+            b = (px.b as int);
+          } catch (_) {
+            r = g = b = 0;
+          }
+        }
         rgb[k++] = r;
         rgb[k++] = g;
         rgb[k++] = b;
@@ -376,75 +376,85 @@ class YoloService {
       return rawBoxes;
     }
 
-    final allVals = preds.expand((r) => r).toList();
-    final double minVal = allVals.reduce(math.min);
-    final double maxVal = allVals.reduce(math.max);
-    debugPrint('🧠 Postprocess value range: min=$minVal, max=$maxVal');
+    // --- Auto-detect if class scores are already probabilities ---
+    // Check only class columns (skip box coords at 0-3 and objectness at objIndex)
+    final classSample = preds.take(200).map((r) => r.sublist(classStart, classStart + numClasses)).expand((r) => r).toList();
+    final double minClassVal = classSample.isNotEmpty ? classSample.reduce(math.min) : 0.0;
+    final double maxClassVal = classSample.isNotEmpty ? classSample.reduce(math.max) : 1.0;
+    final bool looksLikeProb = classSample.isNotEmpty && minClassVal >= -0.01 && maxClassVal <= 1.01;
+    debugPrint('🧠 Class scores appear to be ${looksLikeProb ? "probabilities" : "logits"} '
+              '(min=$minClassVal, max=$maxClassVal)');
 
     for (final row in preds) {
       if (row.length < classStart + numClasses) continue;
 
+      // YOLO layout: [cx, cy, w, h, obj, cls...]
       final double cxNorm = row[0];
       final double cyNorm = row[1];
-      final double wNorm  = row[2];
-      final double hNorm  = row[3];
+      final double wNorm = row[2];
+      final double hNorm = row[3];
 
-      double obj = row[objIndex].clamp(0.0, 1.0);
-      if (obj < 0.05) continue;
+      // --- Objectness ---
+      final double rawObj = row[objIndex];
+      final double obj = looksLikeProb ? rawObj : 1.0 / (1.0 + math.exp(-rawObj));
 
-      final List<double> classScores =
-          row.sublist(classStart, classStart + numClasses)
-              .map((v) => v.clamp(0.0, 1.0))
-              .toList();
+      // Filter weak boxes early
+      if (obj < confThreshold) continue;
 
-      double bestClsScore = 0.0;
-      int bestIdx = -1;
-      for (int c = 0; c < classScores.length; c++) {
-        if (classScores[c] > bestClsScore) {
-          bestClsScore = classScores[c];
-          bestIdx = c;
+      // --- Class scores ---
+      final List<double> classLogits = row.sublist(classStart, classStart + numClasses);
+      final List<double> classScores = looksLikeProb
+          ? classLogits
+          : classLogits.map((v) => 1.0 / (1.0 + math.exp(-v))).toList();
+
+      // Find best class
+      double bestScore = classScores[0];
+      int bestIdx = 0;
+      for (int i = 1; i < classScores.length; i++) {
+        if (classScores[i] > bestScore) {
+          bestScore = classScores[i];
+          bestIdx = i;
         }
       }
-      if (bestIdx < 0) continue;
 
-      final double conf = obj * bestClsScore;
+      final double conf = obj * bestScore;
       if (conf < confThreshold) continue;
 
+      // --- Convert to input/image coordinates ---
       final double cxInput = cxNorm * inputSize;
       final double cyInput = cyNorm * inputSize;
-      final double wInput  = wNorm  * inputSize;
-      final double hInput  = hNorm  * inputSize;
+      final double wInput = wNorm * inputSize;
+      final double hInput = hNorm * inputSize;
 
       final double cx = (cxInput - padX) / scale;
       final double cy = (cyInput - padY) / scale;
       final double bw = wInput / scale;
       final double bh = hInput / scale;
 
-      final double left   = (cx - bw / 2).clamp(0.0, origW);
-      final double top    = (cy - bh / 2).clamp(0.0, origH);
-      final double right  = (cx + bw / 2).clamp(0.0, origW);
+      final double left = (cx - bw / 2).clamp(0.0, origW);
+      final double top = (cy - bh / 2).clamp(0.0, origH);
+      final double right = (cx + bw / 2).clamp(0.0, origW);
       final double bottom = (cy + bh / 2).clamp(0.0, origH);
-      final double width  = right - left;
+
+      final double width = right - left;
       final double height = bottom - top;
       if (width < 2.0 || height < 2.0) continue;
 
       rawBoxes.add({
-        'x':          left,
-        'y':          top,
-        'w':          width,
-        'h':          height,
+        'x': left,
+        'y': top,
+        'w': width,
+        'h': height,
         'confidence': conf,
-        // ✅ FIX 3: always emit classIndex so callers can resolve labels from labels.txt.
-        // 'label' is kept as a human-readable fallback but callers should prefer classIndex.
         'classIndex': bestIdx,
-        'label':      'class_$bestIdx',
+        'label': 'class_$bestIdx',
       });
     }
 
-    // NMS per class
+    // --- NMS per class ---
     final Map<String, List<Map<String, dynamic>>> grouped = {};
     for (final b in rawBoxes) {
-      grouped.putIfAbsent(b['label'] as String, () => []).add(b);
+      grouped.putIfAbsent(b['label'], () => []).add(b);
     }
 
     final List<Map<String, dynamic>> finalBoxes = [];
@@ -456,6 +466,8 @@ class YoloService {
     return finalBoxes;
   }
 
+
+  // NMS per class (unchanged)
   List<Map<String, dynamic>> _nmsList(List<Map<String, dynamic>> boxes, double iouThresh) {
     if (boxes.isEmpty) return [];
 

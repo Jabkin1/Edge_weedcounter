@@ -47,6 +47,11 @@ class CameraService {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final previewSize = _controller.value.previewSize;
+    if (previewSize == null) {
+      return const Center(child: Text('Camera preview not available'));
+    }
+
     return Center(
       child: AspectRatio(
         aspectRatio: aspectRatio,
@@ -56,8 +61,9 @@ class CameraService {
             child: FittedBox(
               fit: BoxFit.cover,
               child: SizedBox(
-                width: _controller.value.previewSize!.height,
-                height: _controller.value.previewSize!.width,
+                // previewSize is in sensor landscape; swap for portrait display
+                width: previewSize.height,
+                height: previewSize.width,
                 child: CameraPreview(_controller),
               ),
             ),
