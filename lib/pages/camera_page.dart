@@ -42,7 +42,7 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _takePicture() async {
-    if (_capturedImages.length >= 2) return;
+    if (_capturedImages.length >= 5) return;
     try {
       final image = await _cameraService.takePicture();
       setState(() => _capturedImages.add(image));
@@ -52,7 +52,7 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _pickFromGallery() async {
-    if (_capturedImages.length >= 2) return;
+    if (_capturedImages.length >= 5) return;
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
@@ -68,8 +68,8 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   void _goToResults() {
-    if (_capturedImages.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please capture 2 images first.')),);
+    if (_capturedImages.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please capture 5 images first.')),);
       return;
     }
     final imagePaths = _capturedImages.map((xfile) => xfile.path).toList();
@@ -108,7 +108,7 @@ class _CameraPageState extends State<CameraPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      Text('Images Taken: ${_capturedImages.length}/2'),
+                      Text('Images Taken: ${_capturedImages.length}/5'),
                       const SizedBox(height: 8),
 
                       Row(
@@ -125,7 +125,7 @@ class _CameraPageState extends State<CameraPage> {
                             label: const Text('Reset'),
                           ),
                           ElevatedButton.icon(
-                            onPressed: _capturedImages.length == 2 ? _goToResults : null,
+                            onPressed: _capturedImages.length == 5 ? _goToResults : null,
                             icon: const Icon(Icons.arrow_forward),
                             label: const Text('Results'),
                           ),
