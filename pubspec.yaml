@@ -33,6 +33,7 @@ flutter:
 
   assets:
     - assets/models/yolo.tflite
+    - assets/models/model2.tflite
     - assets/logo.png
     - assets/labels.txt
     - assets/plants.csv
