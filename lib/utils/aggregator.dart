@@ -1,3 +1,5 @@
+import 'package:yweed_counter_plus/utils/plant_data.dart';
+
 /// Recommendation issued for a weed species relative to its economic threshold (ET).
 enum Recommendation {
   noAction,
@@ -9,59 +11,6 @@ enum Recommendation {
         Recommendation.borderline => 'Borderline - manual verification advised',
         Recommendation.intervention => 'Intervention recommended',
       };
-}
-
-/// Reference data used to interpret weed coverage (economic thresholds and species names).
-class CropProtectionThresholds {
-  CropProtectionThresholds._();
-
-  /// Economic thresholds in [plants m⁻²] per species, keyed by EPPO/BAYER code.
-  static const Map<String, double> economicThresholds = {
-    'amare': 0.7, //  Amaranthus retroflexus L.
-    'cheal': 3.5, //  Chenopodium album L.
-    'echcg': 0.1, //  Echinochloa crus-galli (L.) P. Beauv.
-    'galap': 2.0, //  Galium aparine L.
-    'meran': 4.0, //  Mercurialis annua L.
-    'paprh': 8.0, //  Papaver rhoeas L.
-    'polla': 1.0, //  Persicaria lapathifolia (L.) Delarbre
-    'solni': 1.0, //  Solanum nigrum L.
-    'sonas': 1.0, //  Sonchus asper (L.) Hill
-    'steme': 11.0, // Stellaria media (L.) Vill.
-    'verpe': 20.0, // Veronica persica Poir.
-  };
-
-  /// Scientific species names (BAYER code -> name). Only weed species that carry
-  /// an economic threshold are listed; the crop ('maize') is excluded on purpose.
-  static const Map<String, String> speciesNames = {
-    'amare': 'Amaranthus retroflexus L.',
-    'cheal': 'Chenopodium album L.',
-    'echcg': 'Echinochloa crus-galli (L.) P. Beauv.',
-    'galap': 'Galium aparine L.',
-    'meran': 'Mercurialis annua L.',
-    'paprh': 'Papaver rhoeas L.',
-    'polla': 'Persicaria lapathifolia (L.) Delarbre',
-    'solni': 'Solanum nigrum L.',
-    'sonas': 'Sonchus asper (L.) Hill',
-    'steme': 'Stellaria media (L.) Vill.',
-    'verpe': 'Veronica persica Poir.',
-  };
-
-  /// YOLO class order as declared in assets/labels.txt. Used as a fallback to
-  /// resolve a detection that only carries a numeric class index.
-  static const List<String> labelOrder = [
-    'steme',
-    'echcg',
-    'solni',
-    'cheal',
-    'maize',
-    'amare',
-    'verpe',
-    'polla',
-    'galap',
-    'paprh',
-    'meran',
-    'sonas',
-  ];
 }
 
 /// Coverage assessment of a single weed species against its economic threshold (ET).
@@ -90,7 +39,7 @@ class DetectionAggregator {
   static const double sampleAreaM2 = 2.5;
 
   /// Each picture therefore covers 0.5 m².
-  static const double areaPerPictureM2 = sampleAreaM2 / pictureSampleSize;
+  static const double areaPerPictureM2 = 0.5;
 
   /// Densities within ±10% of the ET are treated as borderline (manual check).
   static const double borderlineTolerance = 0.10;
@@ -120,7 +69,7 @@ class DetectionAggregator {
     int count = 0;
     for (final detectionList in history) {
       for (final item in detectionList) {
-        if (item['label'] == label || item['classIndex'] == _codeToIndex(label)) {
+        if (item['label'] == label) {
           total += (item['confidence'] as num).toDouble();
           count++;
         }
@@ -173,15 +122,14 @@ class DetectionAggregator {
   List<SpeciesAssessment> assessCoverage() {
     final densities = densityPerLabel();
     return [
-      for (final entry in CropProtectionThresholds.economicThresholds.entries)
-        SpeciesAssessment(
-          label: entry.key,
-          speciesName:
-              CropProtectionThresholds.speciesNames[entry.key] ?? entry.key,
-          densityPerM2: densities[entry.key] ?? 0.0,
-          economicThreshold: entry.value,
-          recommendation:
-              classifyDensity(densities[entry.key] ?? 0.0, entry.value),
+      for (final entry in plant_data.getLabels())
+        if (plant_data.getThreshold(entry) >= 0 && (densities[entry]??0) > 0)/// super important to avoid including corn in the mix
+          SpeciesAssessment(
+            label: entry,
+            speciesName: plant_data.getScientificName(entry),
+            densityPerM2: densities[entry] ?? 0.0,
+            economicThreshold: plant_data.getThreshold(entry),
+            recommendation: classifyDensity(densities[entry] ?? 0.0, plant_data.getThreshold(entry)),
         ),
     ];
   }
@@ -212,29 +160,6 @@ class DetectionAggregator {
   /// Handles both the resolved labels ('amare', 'steme', ...) and raw fallbacks
   /// ('class_5') produced by the YOLO post-processor.
   static String resolveSpeciesCode(Object? label, Object? classIndex) {
-    if (label is String) {
-      if (CropProtectionThresholds.labelOrder.contains(label) ||
-          CropProtectionThresholds.economicThresholds.containsKey(label)) {
-        return label;
-      }
-      if (label.startsWith('class_')) {
-        final idx = int.tryParse(label.substring('class_'.length));
-        if (idx != null && idx >= 0 && idx < CropProtectionThresholds.labelOrder.length) {
-          return CropProtectionThresholds.labelOrder[idx];
-        }
-      }
-    }
-    if (classIndex is num) {
-      final idx = classIndex.toInt();
-      if (idx >= 0 && idx < CropProtectionThresholds.labelOrder.length) {
-        return CropProtectionThresholds.labelOrder[idx];
-      }
-    }
     return label is String ? label : 'Unknown';
-  }
-
-  static int? _codeToIndex(String code) {
-    final idx = CropProtectionThresholds.labelOrder.indexOf(code);
-    return idx >= 0 ? idx : null;
   }
 }

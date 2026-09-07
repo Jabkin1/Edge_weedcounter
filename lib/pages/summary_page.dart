@@ -15,19 +15,6 @@ class SummaryPage extends StatelessWidget {
 
   String _densityText(double v) => v.toStringAsFixed(2);
 
-  /// Scientific name from the plant CSV when available, else built-in data.
-  String _sciName(String label) {
-    final fromCsv = plant_data.getScientificName(label);
-    return fromCsv.isNotEmpty
-        ? fromCsv
-        : (CropProtectionThresholds.speciesNames[label] ?? label);
-  }
-
-  String _commonName(String label) {
-    final fromCsv = plant_data.getName(label);
-    return fromCsv.isNotEmpty ? fromCsv : '';
-  }
-
   Widget _buildHeader(
     BuildContext context,
     List<SpeciesAssessment> triggers,
@@ -65,7 +52,7 @@ class SummaryPage extends StatelessWidget {
 
     final actionList = triggers
         .map((t) =>
-            '${_sciName(t.label)} (${_densityText(t.densityPerM2)} / ${_densityText(t.economicThreshold)} plants·m⁻²)')
+            '${plant_data.getScientificName(t.label)} (${_densityText(t.densityPerM2)} / ${_densityText(t.economicThreshold)} plants·m⁻²)')
         .join('\n');
 
     return Card(
@@ -126,7 +113,7 @@ class SummaryPage extends StatelessWidget {
 
   Widget _buildAssessmentTile(BuildContext context, SpeciesAssessment a) {
     final (icon, color) = _styleFor(a.recommendation);
-    final common = _commonName(a.label);
+    final common = plant_data.getName(a.label);
     // Spraying (pulverisation) notification when intervention is recommended.
     final showSpray = a.recommendation == Recommendation.intervention &&
         plant_data.getRow(a.label) != null;
@@ -144,7 +131,7 @@ class SummaryPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _sciName(a.label),
+                    plant_data.getScientificName(a.label),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
