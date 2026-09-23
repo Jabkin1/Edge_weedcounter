@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../gen_l10n/app_localizations.dart';
 import '../utils/aggregator.dart';
 import '../utils/plant_data.dart';
 
@@ -31,21 +33,18 @@ class SummaryPage extends StatelessWidget {
     final Color color;
 
     if (!any) {
-      title = 'No intervention required';
-      message =
-          'All species are below their economic thresholds in the sampled area.';
+      title = AppLocalizations.of(context)!.noInterventionRequired;
+      message = AppLocalizations.of(context)!.noInterventionMessage;
       icon = Icons.check_circle_outline;
       color = Colors.green;
     } else if (borderlineOnly) {
-      title = 'Manual verification advised';
-      message =
-          'Coverage is within ±10% of the economic threshold for the species below.';
+      title = AppLocalizations.of(context)!.manualVerificationAdvised;
+      message = AppLocalizations.of(context)!.manualVerificationMessage;
       icon = Icons.warning_amber_rounded;
       color = Colors.orange;
     } else {
-      title = 'Intervention recommended';
-      message =
-          'One or more weed species exceed their economic threshold in this sample.';
+      title = AppLocalizations.of(context)!.interventionRecommended;
+      message = AppLocalizations.of(context)!.interventionMessage;
       icon = Icons.error_outline;
       color = Colors.red;
     }
@@ -85,8 +84,7 @@ class SummaryPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Sample: $pictures of ${DetectionAggregator.pictureSampleSize} '
-              'pictures · ${area.toStringAsFixed(1)} m²',
+              AppLocalizations.of(context)!.sampleInfo(pictures.toString(), DetectionAggregator.pictureSampleSize.toString(), area.toStringAsFixed(1)),
               style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
             const SizedBox(height: 8),
@@ -147,13 +145,11 @@ class SummaryPage extends StatelessWidget {
                     ),
                   const SizedBox(height: 4),
                   Text(
-                    'Density: ${_densityText(a.densityPerM2)} plants·m⁻²   '
-                    '|   ET: ${_densityText(a.economicThreshold)} plants·m⁻²',
+                    AppLocalizations.of(context)!.densityText( _densityText(a.densityPerM2), _densityText(a.economicThreshold)),
                     style: const TextStyle(fontSize: 13),
                   ),
                   Text(
-                    'Detected: ${(a.densityPerM2 * aggregator.sampledAreaM2).round()} '
-                    'plants in ${aggregator.samplePictureCount} pictures',
+                    AppLocalizations.of(context)!.detectedInfo(a.densityPerM2 * aggregator.sampledAreaM2,aggregator.samplePictureCount.toString()),
                     style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
@@ -198,7 +194,7 @@ class SummaryPage extends StatelessWidget {
     final area = aggregator.sampledAreaM2;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detection Summary')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.detectionSummary)),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
@@ -207,7 +203,7 @@ class SummaryPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              'Weed coverage per species (5 pictures = 2.5 m²)',
+              AppLocalizations.of(context)!.weedCoveragePerSpecies,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
           ),

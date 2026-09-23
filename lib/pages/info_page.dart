@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../gen_l10n/app_localizations.dart';
 import '../utils/models.dart';
 
 class InfoPage extends StatelessWidget {
@@ -9,7 +10,7 @@ class InfoPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFD7DAE0),
       appBar: AppBar(
-        title: const Text('Info'),
+        title: Text(AppLocalizations.of(context)!.info),
       ),
       body: Center(
         child: Padding(
@@ -17,11 +18,9 @@ class InfoPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Weed Counter+ v1.2\n\n'
-                    'This app helps you detect weed species and their coverage on fields. '
-                    'Use the camera to take 10 random images of the field, run the analysis in results and watch what to do in summary.\n\n',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.weedCounterDescription,
+                style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Ubuntu',
                   fontWeight: FontWeight.w700,

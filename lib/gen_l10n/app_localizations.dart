@@ -5,7 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +94,11 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+    Locale('fr'),
+  ];
 
   /// No description provided for @capture.
   ///
@@ -117,6 +123,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Return to Home'**
   String get returnHome;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @detections.
+  ///
+  /// In en, this message translates to:
+  /// **'Detections'**
+  String get detections;
+
+  /// No description provided for @detectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection Summary'**
+  String get detectionSummary;
+
+  /// No description provided for @results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get results;
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get info;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @languagePreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Language Preference'**
+  String get languagePreference;
+
+  /// No description provided for @modelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Selection:\n Choose model to use for the detection, a larger model is preferred for a more accurate detection, but it might be difficult to run on all phones'**
+  String get modelSelection;
+
+  /// No description provided for @cropModelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Model Selection'**
+  String get cropModelSelection;
+
+  /// No description provided for @imagesTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Images Taken: {count}/5'**
+  String imagesTaken(Object count);
+
+  /// No description provided for @noDetectionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No detections found.'**
+  String get noDetectionsFound;
+
+  /// No description provided for @pleaseCapture5ImagesFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please capture 5 images first.'**
+  String get pleaseCapture5ImagesFirst;
+
+  /// No description provided for @runDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Detection'**
+  String get runDetection;
+
+  /// No description provided for @viewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'View Summary'**
+  String get viewSummary;
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @pageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get pageNotFound;
+
+  /// No description provided for @weedCounterVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Weed Counter+ version 1.2'**
+  String get weedCounterVersion;
+
+  /// No description provided for @weedCounterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weed Counter+ v1.2\n\nThis app helps you detect weed species and their coverage on fields. Use the camera to take 10 random images of the field, run the analysis in results and watch what to do in summary.\n\n'**
+  String get weedCounterDescription;
+
+  /// No description provided for @weedCoveragePerSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Weed coverage per species (5 pictures = 2.5 m²)'**
+  String get weedCoveragePerSpecies;
+
+  /// No description provided for @sampleInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample: {pictures} of {total} pictures · {area} m²'**
+  String sampleInfo(Object area, Object pictures, Object total);
+
+  /// No description provided for @densityText.
+  ///
+  /// In en, this message translates to:
+  /// **'Density: {density} plants·m⁻²   |   ET: {threshold} plants·m⁻²'**
+  String densityText(Object density, Object threshold);
+
+  /// No description provided for @detectedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected: {count} plants in {pictures} pictures'**
+  String detectedInfo(Object count, Object pictures);
+
+  /// No description provided for @noInterventionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No intervention required'**
+  String get noInterventionRequired;
+
+  /// No description provided for @manualVerificationAdvised.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual verification advised'**
+  String get manualVerificationAdvised;
+
+  /// No description provided for @interventionRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Intervention recommended'**
+  String get interventionRecommended;
+
+  /// No description provided for @noInterventionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All species are below their economic thresholds in the sampled area.'**
+  String get noInterventionMessage;
+
+  /// No description provided for @manualVerificationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage is within ±10% of the economic threshold for the species below.'**
+  String get manualVerificationMessage;
+
+  /// No description provided for @interventionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'One or more weed species exceed their economic threshold in this sample.'**
+  String get interventionMessage;
+
+  /// No description provided for @coverageHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Header'**
+  String get coverageHeader;
+
+  /// No description provided for @noAction.
+  ///
+  /// In en, this message translates to:
+  /// **'No Action'**
+  String get noAction;
+
+  /// No description provided for @borderline.
+  ///
+  /// In en, this message translates to:
+  /// **'Borderline'**
+  String get borderline;
+
+  /// No description provided for @intervention.
+  ///
+  /// In en, this message translates to:
+  /// **'Intervention'**
+  String get intervention;
+
+  /// No description provided for @pickImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Image'**
+  String get pickImage;
 }
 
 class _AppLocalizationsDelegate
@@ -130,7 +346,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+      <String>['de', 'en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -139,8 +355,12 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(

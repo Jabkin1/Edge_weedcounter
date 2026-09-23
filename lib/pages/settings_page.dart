@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../gen_l10n/app_localizations.dart';
 import '../utils/models.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -12,11 +13,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String _selectedLanguage = 'English';
   String _selectedModel = 'Default Crop Model';
+  Locale _selectedLocale = const Locale('en');
 
-  final List<String> _availableLanguages = [
-    'English',
-    'German',
-    'French'
+  final List<Map<String, dynamic>> _availableLanguages = [
+    {'name': 'English', 'locale': 'en'},
+    {'name': 'German', 'locale': 'de'},
+    {'name': 'French', 'locale': 'fr'}
   ];
 
   final List<String> _availableModels = [
@@ -28,35 +30,42 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Language Preference',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.languagePreference,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             DropdownButton<String>(
               value: _selectedLanguage,
               items: _availableLanguages
                   .map((lang) => DropdownMenuItem(
-                        value: lang,
-                        child: Text(lang),
+                        value: lang['name'] as String,
+                        child: Text(lang['name'] as String),
                       ))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
-                  setState(() => _selectedLanguage = value);
+                  final selectedLang = _availableLanguages.firstWhere(
+                    (lang) => lang['name'] == value,
+                    orElse: () => _availableLanguages[0],
+                  );
+                  setState(() {
+                    _selectedLanguage = value;
+                    _selectedLocale = Locale(selectedLang['locale'] as String);
+                  });
                 }
               },
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Model Selection:\n Choose model to use for the detection, a larger model is preferred for a more accurate detection, but it might be difficult to run on all phones',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.modelSelection,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             DropdownButton<String>(
@@ -71,9 +80,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ModelSelection.selectedModel = value!;
                 }),
             const SizedBox(height: 24),
-            const Text(
-              'Crop Model Selection',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.cropModelSelection,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             DropdownButton<String>(

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
+
+import '../gen_l10n/app_localizations.dart';
 import '../services/yolo_service.dart';
 import '../utils/aggregator.dart';
 import '../utils/detection_painter.dart';
@@ -205,7 +207,7 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _buildDetectionList(List detections) {
     if (detections.isEmpty) {
-      return const Text("No detections found.");
+      return Text(AppLocalizations.of(context)!.noDetectionsFound);
     }
 
     return Column(
@@ -226,7 +228,7 @@ class _ResultPageState extends State<ResultPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFD7DAE0),
       appBar: AppBar(
-        title: const Text("Detections"),
+        title: Text(AppLocalizations.of(context)!.detections),
         automaticallyImplyLeading: true,
       ),
       body: _loading
@@ -253,7 +255,7 @@ class _ResultPageState extends State<ResultPage> {
                             : _buildImageWithBoxes(path, detections),
                         const SizedBox(height: 8),
                         Text(
-                          "Detections: ${detections.length}",
+                          '${AppLocalizations.of(context)!.detections}: ${detections.length}',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -268,7 +270,7 @@ class _ResultPageState extends State<ResultPage> {
       floatingActionButton: _detectionComplete && _aggregator != null
           ? FloatingActionButton.extended(
               icon: const Icon(Icons.check_circle),
-              label: const Text('View Summary'),
+              label: Text(AppLocalizations.of(context)!.viewSummary),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -280,7 +282,7 @@ class _ResultPageState extends State<ResultPage> {
             )
           : FloatingActionButton.extended(
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Run Detection'),
+              label: Text(AppLocalizations.of(context)!.runDetection),
               onPressed: _runDetection,
             ),
     );
