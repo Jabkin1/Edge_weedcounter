@@ -104,11 +104,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text(AppLocalizations.of(context)!.settings),
-                      content: Text('${AppLocalizations.of(context)!.languagePreference} ${AppLocalizations.of(context)!.select}'),
+                      content: Text('${AppLocalizations.of(context)!.languageSelection}'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text(AppLocalizations.of(context)!.select),
+                          child: Text(AppLocalizations.of(context)!.LanguageConfirm),
                         ),
                       ],
                     ),
