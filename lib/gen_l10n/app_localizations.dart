@@ -178,6 +178,9 @@ abstract class AppLocalizations {
   /// **'Language Preference'**
   String get languagePreference;
 
+  String get languageSelection;
+  String get LanguageConfirm;
+
   /// No description provided for @modelSelection.
   ///
   /// In en, this message translates to:

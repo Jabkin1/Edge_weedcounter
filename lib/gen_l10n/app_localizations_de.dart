@@ -48,6 +48,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get languagePreference => 'Sprachpräferenz';
 
   @override
+  String get languageSelection => 'Die Sprache wurde geändert. Bitte starten Sie die Anwendung neu.';
+  @override
+  String get LanguageConfirm => 'schließen';
+
+  @override
   String get modelSelection =>
       'Modellauswahl:\n Wählen Sie das Modell für die Erkennung. Ein größeres Modell ist für eine genauere Erkennung bevorzugt, kann aber auf einigen Geräten schwierig auszuführen sein';
 

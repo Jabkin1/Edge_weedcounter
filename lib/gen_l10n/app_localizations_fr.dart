@@ -48,6 +48,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get languagePreference => 'Préférence de langue';
 
   @override
+  String get languageSelection => 'La langue a été modifiée. Veuillez redémarrer l\'application.';
+  @override
+  String get LanguageConfirm => 'Fermer';
+
+  @override
   String get modelSelection =>
       'Sélection du modèle:\n Choisissez le modèle à utiliser pour la détection. Un modèle plus grand est préférable pour une détection plus précise, mais peut être difficile à exécuter sur tous les téléphones';
 
