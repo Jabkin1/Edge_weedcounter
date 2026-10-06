@@ -14,7 +14,7 @@ class AppRoutes {
   static const String camera = '/camera';
   static const String results = '/results';
   static const String summary = '/summary';
-  static const String settings = '/settings';
+  static const String settings_page = '/settings';
   static const String info = '/info';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -36,7 +36,7 @@ class AppRoutes {
       return MaterialPageRoute(
         builder: (_) => SummaryPage(aggregator: (args is DetectionAggregator) ? args : DetectionAggregator()),
       );
-    } else if (routeName == settings) {
+    } else if (routeName == settings_page) {
       return MaterialPageRoute(builder: (_) => const SettingsPage());
     } else if (routeName == info) {
       return MaterialPageRoute(builder: (_) => const InfoPage());

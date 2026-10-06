@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../gen_l10n/app_localizations.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -23,23 +25,23 @@ class _HomePageState extends State<HomePage> {
               child: Image.asset('assets/logo.png'),
             ),
             ListTile(
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)!.camera),
               onTap: () => Navigator.pushNamed(context, '/camera'),
             ),
             ListTile(
-              title: const Text('Results'),
+              title: Text(AppLocalizations.of(context)!.results),
               onTap: () => Navigator.pushNamed(context, '/results'),
             ),
             ListTile(
-              title: const Text('Summary'),
+              title: Text(AppLocalizations.of(context)!.summary),
               onTap: () => Navigator.pushNamed(context, '/summary'),
             ),
             ListTile(
-              title: const Text('Info'),
+              title: Text(AppLocalizations.of(context)!.info),
               onTap: () => Navigator.pushNamed(context, '/info'),
             ),
             ListTile(
-              title: const Text('Settings'),
+              title: Text(AppLocalizations.of(context)!.settings),
               onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
           ],
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: Text(
-                'Weed Counter+ version 1.2',
+                AppLocalizations.of(context)!.weedCounterVersion,
                 style: const TextStyle(
                   fontFamily: 'Ubuntu',
                   fontSize: 14,

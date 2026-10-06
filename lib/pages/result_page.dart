@@ -2,15 +2,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
+
+import '../gen_l10n/app_localizations.dart';
 import '../services/yolo_service.dart';
 import '../utils/aggregator.dart';
 import '../utils/detection_painter.dart';
 import 'summary_page.dart';
+import 'package:csv/csv.dart';
+import '../utils/plant_data.dart';
 
 /// Main widget class
 class ResultPage extends StatefulWidget {
   final List<String> imagePaths;
   final Map<String, List<Map<String, dynamic>>>? initialDetections;
+
 
   const ResultPage({
     Key? key,
@@ -34,7 +39,7 @@ class _ResultPageState extends State<ResultPage> {
   void initState() {
     super.initState();
     _loadLabels();
-
+    _runDetection();
     // Use provided detections if available (e.g. from a previous session)
     if (widget.initialDetections != null &&
         widget.initialDetections!.isNotEmpty) {
@@ -60,9 +65,8 @@ class _ResultPageState extends State<ResultPage> {
 
   Future<void> _loadLabels() async {
     try {
-      final raw = await rootBundle.loadString('assets/labels.txt');
       setState(() {
-        _labels = raw.split('\n').where((l) => l.trim().isNotEmpty).toList();
+        _labels = plant_data.getLabels();
       });
       debugPrint('✅ Loaded ${_labels.length} labels.');
     } catch (e) {
@@ -71,6 +75,13 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   Future<void> _runDetection() async {
+    if (_labels.isEmpty) {
+      await _loadLabels();
+      if (_labels.isEmpty) {
+        debugPrint('⚠️ No labels loaded! Using placeholders.');
+      }
+    }// ✅ Ensure labels are loaded first
+
     setState(() => _loading = true);
 
     final yolo = YoloService();
@@ -94,30 +105,29 @@ class _ResultPageState extends State<ResultPage> {
       // ✅ FIX 4 & 5: Normalize keys and resolve label names from labels.txt.
       // YoloService now always emits 'classIndex' alongside the placeholder 'label'.
       // We prioritise classIndex → labels[idx] over the raw 'class_N' placeholder.
-      final normalized = rawDetections.map((det) {
+      final normalized = rawDetections.map((detection) {
         // Resolve the numeric class index (prefer explicit classIndex key)
-        final dynamic rawIdx = det['classIndex'] ??
-            det['class'] ??
-            det['class_id'] ??
-            det['label_index'];
-        final int? cidx =
-            rawIdx != null ? (rawIdx as num).toInt() : null;
+        final dynamic rawClassIndex = detection['classIndex'] ??
+            detection['class'] ??
+            detection['class_id'] ??
+            detection['label_index'];
+        final int? classIndex = rawClassIndex != null ? (rawClassIndex as num).toInt() : null;
 
         // Map to a human-readable label
-        final String label = (cidx != null && cidx < _labels.length)
-            ? _labels[cidx]
-            : (det['label'] as String? ??
-               det['class_name'] as String? ??
+        final String label = (classIndex != null && classIndex < _labels.length)
+            ? _labels[classIndex]
+            : (detection['label'] as String? ??
+               detection['class_name'] as String? ??
                'Unknown');
 
         return {
-          'x':          (det['x'] ?? det['left'] ?? 0.0).toDouble(),
-          'y':          (det['y'] ?? det['top']  ?? 0.0).toDouble(),
-          'w':          (det['w'] ?? det['width'] ?? 0.0).toDouble(),
-          'h':          (det['h'] ?? det['height'] ?? 0.0).toDouble(),
-          'confidence': (det['confidence'] ?? det['score'] ?? det['conf'] ?? 0.0)
+          'x':          (detection['x'] ?? detection['left'] ?? 0.0).toDouble(),
+          'y':          (detection['y'] ?? detection['top']  ?? 0.0).toDouble(),
+          'w':          (detection['w'] ?? detection['width'] ?? 0.0).toDouble(),
+          'h':          (detection['h'] ?? detection['height'] ?? 0.0).toDouble(),
+          'confidence': (detection['confidence'] ?? detection['score'] ?? detection['conf'] ?? 0.0)
                             .toDouble(),
-          'classIndex': cidx,
+          'classIndex': classIndex,
           'label':      label,
         };
       }).toList();
@@ -197,7 +207,7 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _buildDetectionList(List detections) {
     if (detections.isEmpty) {
-      return const Text("No detections found.");
+      return Text(AppLocalizations.of(context)!.noDetectionsFound);
     }
 
     return Column(
@@ -218,7 +228,7 @@ class _ResultPageState extends State<ResultPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFD7DAE0),
       appBar: AppBar(
-        title: const Text("Detections"),
+        title: Text(AppLocalizations.of(context)!.detections),
         automaticallyImplyLeading: true,
       ),
       body: _loading
@@ -245,7 +255,7 @@ class _ResultPageState extends State<ResultPage> {
                             : _buildImageWithBoxes(path, detections),
                         const SizedBox(height: 8),
                         Text(
-                          "Detections: ${detections.length}",
+                          '${AppLocalizations.of(context)!.detections}: ${detections.length}',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -260,7 +270,7 @@ class _ResultPageState extends State<ResultPage> {
       floatingActionButton: _detectionComplete && _aggregator != null
           ? FloatingActionButton.extended(
               icon: const Icon(Icons.check_circle),
-              label: const Text('View Summary'),
+              label: Text(AppLocalizations.of(context)!.viewSummary),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -272,7 +282,7 @@ class _ResultPageState extends State<ResultPage> {
             )
           : FloatingActionButton.extended(
               icon: const Icon(Icons.play_arrow),
-              label: const Text('Run Detection'),
+              label: Text(AppLocalizations.of(context)!.runDetection),
               onPressed: _runDetection,
             ),
     );

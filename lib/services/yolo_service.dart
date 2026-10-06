@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
+import '../utils/models.dart';
 
 class BuildInputResult {
   final dynamic inputBuffer; 
@@ -27,8 +28,8 @@ class YoloService {
   static const int inputSize = 640;
 
   // Configurable thresholds
-  double confThreshold = 0.45;
-  double nmsIouThreshold = 0.55;
+  double confThreshold = 0.45;//confidence lower is more observations
+  double nmsIouThreshold = 0.3;//lower is less overlap (maximum allowed overlap)
 
   Future<void> loadModel() async {
     if (_interpreter != null) {
@@ -37,7 +38,8 @@ class YoloService {
     }
 
     try {
-      const String modelAssetPath = 'assets/models/yolo.tflite';
+      final String modelAssetPath = ModelSelection.selectedModelPath;
+
 
       final options = InterpreterOptions()..threads = 4;
       try {

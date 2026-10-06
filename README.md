@@ -1,10 +1,12 @@
 # yolo_edge_app
 
-A new Flutter project.
+Weed Detection and Density Estimation to optimise herbicide use in resource-constrained agricultural contexts 
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+The application will require the setup of android and flutter(includes dart) SDK.
+
+## Further Flutter Documentation
 
 A few resources to get you started if this is your first Flutter project:
 
