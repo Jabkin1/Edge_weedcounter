@@ -13,6 +13,8 @@
   "info": "Info",
   "settings": "Einstellungen",
   "languagePreference": "Sprachpräferenz",
+  "languageSelection": "Die Sprache wurde geändert. Bitte starten Sie die Anwendung neu."
+  "LanguageConfirm": "schließen"
   "modelSelection": "Modellauswahl:\n Wählen Sie das Modell für die Erkennung. Ein größeres Modell ist für eine genauere Erkennung bevorzugt, kann aber auf einigen Geräten schwierig auszuführen sein",
   "cropModelSelection": "Kulturpflanzen-Modellauswahl",
   "imagesTaken": "Aufgenommene Bilder: {count}/5",

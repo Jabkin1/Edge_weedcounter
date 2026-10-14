@@ -13,6 +13,8 @@
   "info": "Info",
   "settings": "Settings",
   "languagePreference": "Language Preference",
+  "languageSelection": "Language Changed. Please restart the Application"
+  "LanguageConfirm": "Close"
   "modelSelection": "Model Selection:\n Choose model to use for the detection, a larger model is preferred for a more accurate detection, but it might be difficult to run on all phones",
   "cropModelSelection": "Crop Model Selection",
   "imagesTaken": "Images Taken: {count}/5",
