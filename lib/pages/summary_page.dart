@@ -173,7 +173,7 @@ class SummaryPage extends StatelessWidget {
                     width: 64,
                     height: 64,
                     child: Image(
-                      image: AssetImage('assets/pulverise.png'),
+                      image: AssetImage('assets/spraying.png'),
                       fit: BoxFit.cover,
                     ),
                   ),

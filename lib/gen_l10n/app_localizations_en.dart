@@ -48,9 +48,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languagePreference => 'Language Preference';
 
   @override
-  String get languageSelection => 'Language Changed. Please restart the Application';
+  String get languageSelection =>
+      'Language Changed. Please restart the Application';
+
   @override
-  String get LanguageConfirm => 'Close';
+  String get languageConfirm => 'Close';
 
   @override
   String get modelSelection =>

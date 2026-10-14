@@ -31,6 +31,11 @@ class YoloService {
   double confThreshold = 0.45;//confidence lower is more observations
   double nmsIouThreshold = 0.3;//lower is less overlap (maximum allowed overlap)
 
+  Future<void> reloadModel() async {
+    dispose();
+    await loadModel();
+  }
+
   Future<void> loadModel() async {
     if (_interpreter != null) {
       debugPrint('✅ YOLO model already loaded');
@@ -39,6 +44,7 @@ class YoloService {
 
     try {
       final String modelAssetPath = ModelSelection.selectedModelPath;
+      print('🔄 Loading model: ${ModelSelection.selectedModel} from path: $modelAssetPath');
 
 
       final options = InterpreterOptions()..threads = 4;

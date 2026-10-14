@@ -178,9 +178,17 @@ abstract class AppLocalizations {
   /// **'Language Preference'**
   String get languagePreference;
 
+  /// No description provided for @languageSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Language Changed. Please restart the Application'**
   String get languageSelection;
 
-  String get LanguageConfirm;
+  /// No description provided for @languageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get languageConfirm;
 
   /// No description provided for @modelSelection.
   ///

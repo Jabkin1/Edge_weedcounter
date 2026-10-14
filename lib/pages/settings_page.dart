@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../gen_l10n/app_localizations.dart';
+import '../services/yolo_service.dart';
 import '../utils/models.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -108,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text(AppLocalizations.of(context)!.LanguageConfirm),
+                          child: Text(AppLocalizations.of(context)!.languageConfirm),
                         ),
                       ],
                     ),
@@ -116,6 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               },
             ),
+
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context)!.modelSelection,
@@ -130,30 +132,22 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: Text(model['name']!),
                   );
                 }).toList(),
-                onChanged: (value) {
-                  ModelSelection.selectedModel = value!;
+                onChanged: (value) async {
+                  setState(()  {ModelSelection.selectedModel = value!;});
+                  showDialog(context: context, barrierDismissible: false,
+                    builder: (ctx) => const AlertDialog(
+                      content: Row(
+                        children: [CircularProgressIndicator(), SizedBox(width: 16), Text('Loading model...'),],),
+                    ),
+                  );
+                  await YoloService().reloadModel();
+                  if (mounted) Navigator.of(context).pop();
                 }),
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context)!.cropModelSelection,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            /*
-            const SizedBox(height: 8),
-            DropdownButton<String>(
-              value: _selectedModel,
-              items: _availableModels
-                  .map((model) => DropdownMenuItem(
-                        value: model,
-                        child: Text(model),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedModel = value);
-                }
-              },
-            ),*/
           ],
         ),
       ),
