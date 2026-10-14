@@ -9,6 +9,11 @@ import 'utils/plant_data.dart';
 //TODO: multiple model selection
 //TODO: not there yet: more crops
 //TODO: write documentation
+
+//TODO: languages to check
+//TODO: switching models doesnt work, in settings.
+//TODO: change image
+//TODO: windows, hardcoded path check again.
 const _kLocaleKey = 'app_locale';
 
 Future<Locale?> _getSavedLocale() async {

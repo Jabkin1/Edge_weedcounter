@@ -336,6 +336,8 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick Image'**
   String get pickImage;
+
+
 }
 
 class _AppLocalizationsDelegate
